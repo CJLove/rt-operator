@@ -21,6 +21,10 @@ logs.configure()
 log = logging.getLogger('RtOperator')
 
 def main():
+    config_file = 'rt-operator.yaml'
+    if len(sys.argv) == 2:
+        config_file = sys.argv[1]
+
     # Default user path for finding kubernetes credentials
     user_kubeconfig = Path(os.path.expanduser("~")).joinpath('.kube', 'config')
 
@@ -30,42 +34,43 @@ def main():
     # Default cgroup handler
     cgroup_handler = None
 
-
-
     # Default: use system hostname
     node_name = get_node_name()
 
-    with open('rt-operator.yaml') as file:
-        config = yaml.safe_load(file)
+    try:
+        with open(config_file) as file:
+            log.info(f"Using {config_file}")
+            config = yaml.safe_load(file)
 
-        if 'log_level' in config:
-            try:
-                log.setLevel(config['log_level'])
-            except:
-                pass
+            if 'log_level' in config:
+                try:
+                    log.setLevel(config['log_level'])
+                except:
+                    pass
 
-        if 'kube_path' in config:
-            kube_path = config['kube_path']
-            user_kubeconfig = Path(kube_path)
+            if 'kube_path' in config:
+                kube_path = config['kube_path']
+                user_kubeconfig = Path(kube_path)
 
-        if 'cgroup_v1_capacity' in config:
-            try:
-                cgroup_v1_capacity = int(config['cgroup_v1_ca'])
-            except:
-                pass
+            if 'cgroup_v1_capacity' in config:
+                try:
+                    cgroup_v1_capacity = int(config['cgroup_v1_capacity'])
+                except:
+                    pass
 
-        if 'node_name' in config:
-            node_name = config['node_name']
+            if 'node_name' in config:
+                node_name = config['node_name']
 
-        if 'cgroup_handler' in config:
-            name = config['cgroup_handler']
-            if name == "noop":
-                cgroup_handler = cgroup_noop.cgroup_noop()
-            elif name == "cgroup_v1":
-                cgroup_handler = cgroup_v1.cgroup_v1(cgroup_v1_capacity)
-            elif name == "cgroup_v2":
-                cgroup_handler = cgroup_v2.cgroup_v2()
-
+            if 'cgroup_handler' in config:
+                name = config['cgroup_handler']
+                if name == "noop":
+                    cgroup_handler = cgroup_noop.cgroup_noop()
+                elif name == "cgroup_v1":
+                    cgroup_handler = cgroup_v1.cgroup_v1(cgroup_v1_capacity)
+                elif name == "cgroup_v2":
+                    cgroup_handler = cgroup_v2.cgroup_v2()
+    except:
+        log.error(f"Error parsing {config_file}")
 
     if cgroup_handler == None:
         if os.path.isdir('/sys/fs/cgroup/cpu,cpuacct'):

@@ -17,7 +17,7 @@ class cgroup_v1:
         self.cap = cap
         self.log.info(f"Using cpu.rt_runtime_us capacity {cap} for real-time PODs")
         if self.__write_cpu_rt_runtime_us(self.base_dir, cap):
-            self.log.info(f"Wrote {cap} to kubepods.cpu.rt_runtime_us")
+            self.log.debug(f"Wrote {cap} to kubepods.cpu.rt_runtime_us")
 
     def type(self):
         return "cgroup_v1"
