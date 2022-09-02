@@ -76,7 +76,7 @@ class cgroup_v1:
 
     def __rewrite_pod_capacity(self):
         if self.__write_cpu_rt_runtime_us(self.base_dir, self.cap):
-            self.log.debug(f"Wrote {cap} to kubepods.cpu.rt_runtime_us")
+            self.log.debug(f"Wrote {self.cap} to kubepods.cpu.rt_runtime_us")
 
     # Return the current aggregate rt_runtime_us allocated for all Kubernetes pods on this node
     def __aggregate_rt_runtime_us(self):
