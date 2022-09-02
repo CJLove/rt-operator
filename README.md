@@ -25,4 +25,40 @@ Kubernetes operator supporting containers with real-time threads
     - urllib3 (1.26.12)
     - websocket-client (1.3.1)
 
-## 
+## Configuration
+Settings in `rt-operator.yaml` config file:
+```yaml
+---
+### rt-operator configuration settings
+
+# Log level: WARN | INFO | DEBUG 
+log_level: "DEBUG"
+
+# Full path to kubernetes credentials file (override ~/.kube/config)
+kube_path: /path/to/.kube/config
+
+# Override system hostname used for comparisons with pod's node allocation
+node_name: myhostname
+
+# Override cgroup handler: noop | cgroup_v1 | cgroup_v2
+# cgroup_handler: noop
+
+# Override cgroup v1 handler settings:
+# cpu.rt_runtime_capacity for all real-time pods on this node
+cgroup_v1_capacity: 950000
+```
+
+## Running under systemd
+### Installing and enabling
+Adjust paths in rt-operator.service as necessary
+```bash
+$ sudo cp rt-operator.service /etc/systemd/system/
+$ sudo systemctl enable rt-operator
+$ sudo systemctl start rt-operator
+```
+
+### Monitoring & Logs
+```bash
+$ systemctl status rt-operator
+$ journalctl -u rt-operator -f
+```

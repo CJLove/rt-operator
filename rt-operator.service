@@ -1,0 +1,10 @@
+[Unit]
+Description=rt-operator
+After=network.target
+
+[Service]
+ExecStart=/root/rt-operator/rt-operator.py /root/rt-operator/rt-operator.py
+ExecStop=/bin/kill -INT ${MAINPID}
+
+[Install]
+WantedBy=multi-user.target
