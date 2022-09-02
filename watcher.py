@@ -83,6 +83,10 @@ class watcher:
                     raw = event['raw_object']
                     type = event['type']
 
+                    # Filter based on type
+                    if type == 'DELETED':
+                        continue
+
                     # Filter based on QoS class
                     if not self.__is_guaranteed_qos(raw):
                         continue
