@@ -9,9 +9,9 @@ class cgroup_noop:
     def type(self):
         return "noop"
 
-    def current_rt_runtime_us(self):
-        return 0
+    def has_valid_rt_annotation(self,annotations):
+        return True
 
-    def set_rt_runtime_us(self, container_id, rt_runtime_us):
+    def set_rt_pod(self, container_id, annotations):
         return True
         

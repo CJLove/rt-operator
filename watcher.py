@@ -2,15 +2,27 @@ import logging
 
 from kubernetes import (
     client,
-    config,
     watch
 )
 
+# The watcher class is responsible for consuming a stream of pod-related
+# events, filtering events down to those corresponding to pods meeting
+# the following conditions:
+# 1. Guaranteed QoS class
+# 2. Allocated to this node
+# 3. Containing the 'realtime': 'true' annotation
+# 4. Containing a valid annotation for the cgroup_handler type
+#    cgroup_v1: 'rt_runtime_us': annotation exists within the valid range (0 .. handler.capacity) 
 class watcher:
     def __init__(self, node_name, cgroup_handler):
         self.node_name = node_name
         self.cgroup_handler = cgroup_handler
         self.log = logging.getLogger('RtOperator')
+
+    def is_rt_pod(self,annotations):
+        if 'realtime' not in annotations:
+            return False
+        return annotations['realtime'] == "true"
 
     def watch_pods(self):
         v1 = client.CoreV1Api()
@@ -26,7 +38,6 @@ class watcher:
                     type = event['type']
                     name=''
                     container_id=''
-                    rt_runtime_us = 0
                     # try to extract necessary fields from raw_object and filter based
                     # on extracted fields
                     try:
@@ -44,27 +55,23 @@ class watcher:
                         if (qos != 'Guaranteed'):
                             continue
 
-                        # Filter on pods with 'realtime' annotation and 'rt_runtime_us' value
+                        # Filter if pod isn't scheduled on this node
+                        if self.node_name != node:
+                            continue
+
+                        # Filter pod without annotations
                         if 'annotations' not in raw['metadata']:
                             continue
                         annotations = raw['metadata']['annotations']
 
-                        is_rt = False
-                        if 'realtime' not in annotations:
+                        # Filter pod without "realtime" annotation
+                        if not self.is_rt_pod(annotations):
                             continue
-                        is_rt = annotations['realtime'] == "true"
-                        if (not is_rt):
+                        
+                        # Filter pod without valid annotation(s) for the cgroup handler
+                        if not self.cgroup_handler.has_valid_rt_annotation(annotations):
                             continue
-                        if 'rt_runtime_us' not in annotations:
-                            continue
-                        rt_runtime_str = annotations['rt_runtime_us']
-                        try:
-                            # Convert 'rt_runtime_us' annotation to integer
-                            rt_runtime_us = int(rt_runtime_str)
-                        except:
-                            # Log error and continue if rt_runtime_us annotation is invalid
-                            self.log.error(f"Pod {name} invalid rt_runtime_us annotation: {rt_runtime_str}")
-                            continue
+                        
                         # See if container_id is populated
                         if len(statuses) > 0:
                             status = statuses[0]
@@ -75,12 +82,8 @@ class watcher:
                         if container_id == "":
                             continue
 
-                        # Filter if pod isn't scheduled on this node
-                        if self.node_name != node:
-                            continue
-
-                        self.log.debug(f"Event {type} Pod {name} Qos {qos} Node {node} rt_runtime_us {rt_runtime_us} container_id {container_id}")           
-                        self.cgroup_handler.set_rt_runtime_us(container_id, rt_runtime_us)
+                        self.log.debug(f"Event {type} Pod {name} Qos {qos} Node {node} container_id {container_id}")           
+                        self.cgroup_handler.set_rt_pod(container_id, annotations)
 
             except KeyboardInterrupt:
                 # Handle service exit

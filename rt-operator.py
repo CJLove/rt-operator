@@ -14,9 +14,7 @@ import watcher
 import yaml
 
 from kubernetes import (
-    client,
-    config,
-    watch
+    config
 )
 
 logs.configure()

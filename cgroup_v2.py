@@ -9,9 +9,8 @@ class cgroup_v2:
     def type(self):
         return "cgroup_v2"
 
-    def current_rt_runtime_us(self):
-        return 0
-
-    def set_rt_runtime_us(self, container_id, rt_runtime_us):
+    def has_valid_rt_annotation(self,annotations):
         return True
-        
+
+    def set_rt_pod(self, container_id, annotations):
+        return True
