@@ -43,9 +43,10 @@ class watcher:
 
     def __has_container_id(self, object):
         try:
-            statuses = object['status']['containerStatuses']
+            if 'containerStatus' in object['status']:
+                statuses = object['status']['containerStatuses']
         except Exception as e:
-            self.log.debug(f"Exception:: {e}")
+            self.log.debug(f"Exception: {e}")
             return ('', False)
         else:
             # See if containerID is populated
