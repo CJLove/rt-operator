@@ -50,10 +50,14 @@ class watcher:
         else:
             # See if containerID is populated
             if len(statuses) > 0:
+                
+                self.log.debug(f"statuses {statuses}")
                 status = statuses[0]
                 str = status['containerID']
+                container_id = str
                 # Strip leading 'containerd://' prefix
-                container_id = str.lstrip('containerd://')
+                if str.startswith('containerd://'):
+                    container_id = str[len('containerd://'):]
                 # TBD: other container runtimes
                 return (container_id, True)
         return ('', False)
