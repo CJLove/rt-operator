@@ -1,0 +1,118 @@
+#!/usr/bin/env python3
+
+import logging
+import os
+from pathlib import Path
+import sys
+import ast
+import logs
+import socket
+import cgroup_noop
+import cgroup_v1
+import cgroup_v2
+import watcher
+import yaml
+
+from kubernetes import (
+    client,
+    config,
+    watch
+)
+
+logs.configure()
+log = logging.getLogger('RtOperator')
+
+def main():
+    # Default user path for finding kubernetes credentials
+    user_kubeconfig = Path(os.path.expanduser("~")).joinpath('.kube', 'config')
+
+    # Default cgroup v1 capacity to be managed by the rt-operator on this node
+    cgroup_v1_capacity = 950000
+
+    # Default cgroup handler
+    cgroup_handler = None
+
+
+
+    # Default: use system hostname
+    node_name = get_node_name()
+
+    with open('rt-operator.yaml') as file:
+        config = yaml.safe_load(file)
+
+        if 'log_level' in config:
+            try:
+                log.setLevel(config['log_level'])
+            except:
+                pass
+
+        if 'kube_path' in config:
+            kube_path = config['kube_path']
+            user_kubeconfig = Path(kube_path)
+
+        if 'cgroup_v1_capacity' in config:
+            try:
+                cgroup_v1_capacity = int(config['cgroup_v1_ca'])
+            except:
+                pass
+
+        if 'node_name' in config:
+            node_name = config['node_name']
+
+        if 'cgroup_handler' in config:
+            name = config['cgroup_handler']
+            if name == "noop":
+                cgroup_handler = cgroup_noop.cgroup_noop()
+            elif name == "cgroup_v1":
+                cgroup_handler = cgroup_v1.cgroup_v1(cgroup_v1_capacity)
+            elif name == "cgroup_v2":
+                cgroup_handler = cgroup_v2.cgroup_v2()
+
+
+    if cgroup_handler == None:
+        if os.path.isdir('/sys/fs/cgroup/cpu,cpuacct'):
+            # System is running cgroups v1
+            cgroup_handler = cgroup_v1.cgroup_v1(950000)
+        elif os.path.isdir('/sys/fs/cgroup/system.slice'):
+            # Future: support cgroups v2       
+            cgroup_handler = cgroup_v2.cgroup_v2()
+        else:
+            cgroup_handler = cgroup_noop.cgroup_noop()
+
+    load_kube_credentials(user_kubeconfig)
+
+    log.info("Using %s cgroup handler" % cgroup_handler.type())
+    log.info("Using node name %s" % node_name)
+
+    watch = watcher.watcher(node_name,cgroup_handler)
+    watch.watch_pods()
+
+def get_node_name():
+    node = socket.gethostname().split('.')[0]
+    return node
+
+def load_kube_credentials(user_kubeconfig):
+
+    log.debug("Looking for credentials...")
+    dev_kubeconfig = Path(__file__).joinpath('..', '..', '..',
+                                             '.tmp', 'serviceaccount',
+                                             'dev_kubeconfig.yml').resolve()
+
+    if dev_kubeconfig.exists():
+        log.info("Loading from dev kube config")
+        config.load_kube_config(config_file=str(dev_kubeconfig))
+    elif user_kubeconfig.exists():
+        log.info("Loading user kube config")
+        config.load_kube_config()
+    else:
+        log.info("Loading in-cluster kube config")
+        try:
+            config.load_incluster_config()
+        except config.ConfigException:
+            log.error("Unable to load in-cluster config file. Exiting.")
+            sys.exit(1)
+
+
+
+if __name__ == "__main__":
+    main()

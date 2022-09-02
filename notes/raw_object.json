@@ -1,0 +1,304 @@
+{
+    "kind": "Pod",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "threadtest2-7c7d48bb9-zgpz9",
+        "generateName": "threadtest2-7c7d48bb9-",
+        "namespace": "default",
+        "uid": "08d96bc0-ebdd-4a58-a241-97ca15c79b02",
+        "resourceVersion": "11424100",
+        "creationTimestamp": "2022-08-31T03:06:30Z",
+        "labels": {
+            "app": "threadtest2",
+            "pod-template-hash": "7c7d48bb9"
+        },
+        "annotations": {
+            "realtime": "true",
+            "rt_runtime_us": "25000"
+        },
+        "ownerReferences": [
+            {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "threadtest2-7c7d48bb9",
+                "uid": "c9ac7ea0-1253-43c8-8b3b-30c6dcac0962",
+                "controller": true,
+                "blockOwnerDeletion": true
+            }
+        ],
+        "managedFields": [
+            {
+                "manager": "k3s",
+                "operation": "Update",
+                "apiVersion": "v1",
+                "time": "2022-08-31T03:06:30Z",
+                "fieldsType": "FieldsV1",
+                "fieldsV1": {
+                    "f:metadata": {
+                        "f:annotations": {
+                            ".": {},
+                            "f:realtime": {},
+                            "f:rt_runtime_us": {}
+                        },
+                        "f:generateName": {},
+                        "f:labels": {
+                            ".": {},
+                            "f:app": {},
+                            "f:pod-template-hash": {}
+                        },
+                        "f:ownerReferences": {
+                            ".": {},
+                            "k:{\"uid\":\"c9ac7ea0-1253-43c8-8b3b-30c6dcac0962\"}": {}
+                        }
+                    },
+                    "f:spec": {
+                        "f:containers": {
+                            "k:{\"name\":\"threadtest2\"}": {
+                                ".": {},
+                                "f:image": {},
+                                "f:imagePullPolicy": {},
+                                "f:name": {},
+                                "f:resources": {
+                                    ".": {},
+                                    "f:limits": {
+                                        ".": {},
+                                        "f:cpu": {},
+                                        "f:memory": {}
+                                    },
+                                    "f:requests": {
+                                        ".": {},
+                                        "f:cpu": {},
+                                        "f:memory": {}
+                                    }
+                                },
+                                "f:securityContext": {
+                                    ".": {},
+                                    "f:capabilities": {
+                                        ".": {},
+                                        "f:add": {}
+                                    },
+                                    "f:privileged": {}
+                                },
+                                "f:terminationMessagePath": {},
+                                "f:terminationMessagePolicy": {}
+                            }
+                        },
+                        "f:dnsPolicy": {},
+                        "f:enableServiceLinks": {},
+                        "f:nodeSelector": {},
+                        "f:restartPolicy": {},
+                        "f:schedulerName": {},
+                        "f:securityContext": {},
+                        "f:terminationGracePeriodSeconds": {}
+                    }
+                }
+            },
+            {
+                "manager": "k3s",
+                "operation": "Update",
+                "apiVersion": "v1",
+                "time": "2022-08-31T03:06:33Z",
+                "fieldsType": "FieldsV1",
+                "fieldsV1": {
+                    "f:status": {
+                        "f:conditions": {
+                            "k:{\"type\":\"ContainersReady\"}": {
+                                ".": {},
+                                "f:lastProbeTime": {},
+                                "f:lastTransitionTime": {},
+                                "f:status": {},
+                                "f:type": {}
+                            },
+                            "k:{\"type\":\"Initialized\"}": {
+                                ".": {},
+                                "f:lastProbeTime": {},
+                                "f:lastTransitionTime": {},
+                                "f:status": {},
+                                "f:type": {}
+                            },
+                            "k:{\"type\":\"Ready\"}": {
+                                ".": {},
+                                "f:lastProbeTime": {},
+                                "f:lastTransitionTime": {},
+                                "f:status": {},
+                                "f:type": {}
+                            }
+                        },
+                        "f:containerStatuses": {},
+                        "f:hostIP": {},
+                        "f:phase": {},
+                        "f:podIP": {},
+                        "f:podIPs": {
+                            ".": {},
+                            "k:{\"ip\":\"10.42.0.213\"}": {
+                                ".": {},
+                                "f:ip": {}
+                            }
+                        },
+                        "f:startTime": {}
+                    }
+                },
+                "subresource": "status"
+            }
+        ]
+    },
+    "spec": {
+        "volumes": [
+            {
+                "name": "kube-api-access-s7zgl",
+                "projected": {
+                    "sources": [
+                        {
+                            "serviceAccountToken": {
+                                "expirationSeconds": 3607,
+                                "path": "token"
+                            }
+                        },
+                        {
+                            "configMap": {
+                                "name": "kube-root-ca.crt",
+                                "items": [
+                                    {
+                                        "key": "ca.crt",
+                                        "path": "ca.crt"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "downwardAPI": {
+                                "items": [
+                                    {
+                                        "path": "namespace",
+                                        "fieldRef": {
+                                            "apiVersion": "v1",
+                                            "fieldPath": "metadata.namespace"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "defaultMode": 420
+                }
+            }
+        ],
+        "containers": [
+            {
+                "name": "threadtest2",
+                "image": "fir.love.io:3005/threadtest:latest",
+                "resources": {
+                    "limits": {
+                        "cpu": "700m",
+                        "memory": "200Mi"
+                    },
+                    "requests": {
+                        "cpu": "700m",
+                        "memory": "200Mi"
+                    }
+                },
+                "volumeMounts": [
+                    {
+                        "name": "kube-api-access-s7zgl",
+                        "readOnly": true,
+                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                    }
+                ],
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "imagePullPolicy": "Always",
+                "securityContext": {
+                    "capabilities": {
+                        "add": [
+                            "SYS_NICE"
+                        ]
+                    },
+                    "privileged": true
+                }
+            }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+            "cputype": "amd64"
+        },
+        "serviceAccountName": "default",
+        "serviceAccount": "default",
+        "nodeName": "acacia.san.rr.com",
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+            {
+                "key": "node.kubernetes.io/not-ready",
+                "operator": "Exists",
+                "effect": "NoExecute",
+                "tolerationSeconds": 300
+            },
+            {
+                "key": "node.kubernetes.io/unreachable",
+                "operator": "Exists",
+                "effect": "NoExecute",
+                "tolerationSeconds": 300
+            }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true,
+        "preemptionPolicy": "PreemptLowerPriority"
+    },
+    "status": {
+        "phase": "Running",
+        "conditions": [
+            {
+                "type": "Initialized",
+                "status": "True",
+                "lastProbeTime": null,
+                "lastTransitionTime": "2022-08-31T03:06:30Z"
+            },
+            {
+                "type": "Ready",
+                "status": "True",
+                "lastProbeTime": null,
+                "lastTransitionTime": "2022-08-31T03:06:32Z"
+            },
+            {
+                "type": "ContainersReady",
+                "status": "True",
+                "lastProbeTime": null,
+                "lastTransitionTime": "2022-08-31T03:06:32Z"
+            },
+            {
+                "type": "PodScheduled",
+                "status": "True",
+                "lastProbeTime": null,
+                "lastTransitionTime": "2022-08-31T03:06:30Z"
+            }
+        ],
+        "hostIP": "192.168.1.106",
+        "podIP": "10.42.0.213",
+        "podIPs": [
+            {
+                "ip": "10.42.0.213"
+            }
+        ],
+        "startTime": "2022-08-31T03:06:30Z",
+        "containerStatuses": [
+            {
+                "name": "threadtest2",
+                "state": {
+                    "running": {
+                        "startedAt": "2022-08-31T03:06:32Z"
+                    }
+                },
+                "lastState": {},
+                "ready": true,
+                "restartCount": 0,
+                "image": "fir.love.io:3005/threadtest:latest",
+                "imageID": "fir.love.io:3005/threadtest@sha256:2231f02ac4f90aa141f5a52945f38508bc718a5ffe8e0b0287077964ebfa0ca7",
+                "containerID": "containerd://63a70602d03caa8fdf370062083e7ba21436842355e302f86a5cdb2c2d7f09b9",
+                "started": true
+            }
+        ],
+        "qosClass": "Guaranteed"
+    }
+}
