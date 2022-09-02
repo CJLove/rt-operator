@@ -16,8 +16,9 @@ class cgroup_v1:
         self.log = logging.getLogger('RtOperator')
         self.cap = cap
         self.log.info(f"Using cpu.rt_runtime_us capacity {cap} for real-time PODs")
-        if self.__write_cpu_rt_runtime_us(self.base_dir, cap):
-            self.log.debug(f"Wrote {cap} to kubepods.cpu.rt_runtime_us")
+        # Try writing the kubepods cpu.rt_runtime_us. This could fail if
+        # the rt-operator service has started before kubelet is running
+        self.__rewrite_pod_capacity()
 
     def type(self):
         return "cgroup_v1"
@@ -55,6 +56,9 @@ class cgroup_v1:
             self.log.error(f"Pod {name} invalid rt_runtime_us annotation")
             return False
         else:
+            # (re)write overall pod capacity
+            self.__rewrite_pod_capacity()
+
             # Using Path.glob() find the pod subdirectory containing the specific container_id 
             # directory. Expect exactly 1 directory to match this
             cont_dirs = [ d for d in self.base_dir.glob('pod*/'+container_id) if d.is_dir()]
@@ -69,6 +73,10 @@ class cgroup_v1:
         
             self.log.error(f"Pod {name} unable to find container cgroup using {container_id}")
             return False  
+
+    def __rewrite_pod_capacity(self):
+        if self.__write_cpu_rt_runtime_us(self.base_dir, self.cap):
+            self.log.debug(f"Wrote {cap} to kubepods.cpu.rt_runtime_us")
 
     # Return the current aggregate rt_runtime_us allocated for all Kubernetes pods on this node
     def __aggregate_rt_runtime_us(self):
