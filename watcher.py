@@ -22,7 +22,7 @@ class watcher:
         try:
             name = object['spec']['nodeName'].split('.')[0]
         except Exception as e:
-            self.log.debug(f"Exception: {e}")
+            #self.log.debug(f"Exception: {e}")
             return ('',False)
         else:
             return (name, self.node_name == name)
@@ -36,17 +36,16 @@ class watcher:
         try:
             qos = object['status']['qosClass']
         except Exception as e:
-            self.log.debug(f"Exception: {e}")
+            #self.log.debug(f"Exception: {e}")
             return False
         else:
             return qos == 'Guaranteed'
 
     def __has_container_id(self, object):
         try:
-            if 'containerStatus' in object['status']:
-                statuses = object['status']['containerStatuses']
+            statuses = object['status']['containerStatuses']
         except Exception as e:
-            self.log.debug(f"Exception: {e}")
+            #self.log.debug(f"Exception: {e}")
             return ('', False)
         else:
             # See if containerID is populated
