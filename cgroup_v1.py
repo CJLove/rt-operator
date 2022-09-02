@@ -23,9 +23,9 @@ class cgroup_v1:
         return "cgroup_v1"
 
     def has_valid_rt_annotation(self,annotations):
-        if 'cpu_runtime_us' in annotations:
+        if 'rt_runtime_us' in annotations:
             try:
-                cpu_rt_runtime_us = int(annotations['cpu_runtime_us'])
+                cpu_rt_runtime_us = int(annotations['rt_runtime_us'])
                 self.log.debug(f"Request: {cpu_rt_runtime_us}")
                 current_usage = self.__current_rt_runtime_us()
                 self.log.debug(f"Current usage: {current_usage}")
@@ -51,10 +51,10 @@ class cgroup_v1:
         return rt_runtime_us
 
     def set_rt_pod(self, container_id, annotations):
-        if 'cpu_runtime_us' not in annotations:
+        if 'rt_runtime_us' not in annotations:
             return False
         try:
-            cpu_rt_runtime_us = int(annotations['cpu_runtime_us'])
+            cpu_rt_runtime_us = int(annotations['rt_runtime_us'])
         except:
             return False
         else:
