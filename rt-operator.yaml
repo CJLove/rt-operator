@@ -2,17 +2,17 @@
 ### rt-operator configuration settings
 
 # Log level: WARN | INFO | DEBUG 
-log_level: "INFO"
+log_level: "DEBUG"
 
 # Full path to kubernetes credentials file (override ~/.kube/config)
 #kube_path: /path/to/.kube/config
 
 # Override system hostname used for comparisons with pod's node allocation
-#node_name: myhostname
+node_name: acacia
 
 # Override cgroup handler: noop | cgroup_v1 | cgroup_v2
 # cgroup_handler: noop
 
 # Override cgroup v1 handler settings:
-# cpu.rt_runtime_capacity for all pods on this node
+# cpu.rt_runtime_capacity for all real-time pods on this node
 cgroup_v1_capacity: 950000
