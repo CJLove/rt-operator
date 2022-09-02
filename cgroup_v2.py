@@ -9,8 +9,10 @@ class cgroup_v2:
     def type(self):
         return "cgroup_v2"
 
-    def has_valid_rt_annotation(self,annotations):
-        return True
+    def has_valid_rt_annotation(self, name, container_id, annotations):
+        self.log.debug(f"Pod {name} checking realtime annotations for cgroupv2")
+        return False
 
-    def set_rt_pod(self, container_id, annotations):
-        return True
+    def set_rt_pod(self, name, container_id, annotations):
+        self.log.debug(f"Pod {name} setting realtime capabilities for cgorupv2")
+        return False
