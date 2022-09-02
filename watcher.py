@@ -50,8 +50,6 @@ class watcher:
         else:
             # See if containerID is populated
             if len(statuses) > 0:
-                
-                self.log.debug(f"statuses {statuses}")
                 status = statuses[0]
                 str = status['containerID']
                 container_id = str
