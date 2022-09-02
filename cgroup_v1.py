@@ -26,9 +26,9 @@ class cgroup_v1:
         if 'cpu_runtime_us' in annotations:
             try:
                 cpu_rt_runtime_us = int(annotations['cpu_runtime_us'])
-
+                self.log.debug(f"Request: {cpu_rt_runtime_us}")
                 current_usage = self.__current_rt_runtime_us()
-                self.log.debug(f"Request: {cpu_rt_runtime_us} Current cpu rt usage: {current_usage}us, capacity: {self.cap}")
+                self.log.debug(f"Current usage: {current_usage}")
                 return cpu_rt_runtime_us <= self.cap - current_usage
             except:
                 return False
