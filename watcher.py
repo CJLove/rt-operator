@@ -51,6 +51,8 @@ class watcher:
             # See if containerID is populated
             if len(statuses) > 0:
                 status = statuses[0]
+                if 'containerID' not in status:
+                    return ('', False)
                 str = status['containerID']
                 container_id = str
                 # Strip leading 'containerd://' prefix
