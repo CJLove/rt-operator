@@ -109,14 +109,12 @@ def get_container_runtime(node_name):
     runtime = None
     v1 = client.CoreV1Api()
     nodes = v1.list_node()
-    for node in nodes.items:
-        name = node.metadata.name.split('.')[0]
-        if name == node_name:
-            runtime_version = node.status.node_info.container_runtime_version
-            if runtime_version.startswith('docker'):
-                runtime = docker.docker()
-            elif runtime_version.startswith('containerd'):
-                runtime = containerd.containerd()
+    node = nodes.items[0]
+    runtime_version = node.status.node_info.container_runtime_version
+    if runtime_version.startswith('docker'):
+        runtime = docker.docker()
+    elif runtime_version.startswith('containerd'):
+        runtime = containerd.containerd()
     return runtime
 
 
