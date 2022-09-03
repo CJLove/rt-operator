@@ -3,7 +3,7 @@ Description=rt-operator
 After=network.target
 
 [Service]
-ExecStart=/root/rt-operator/rt-operator.py /root/rt-operator/rt-operator.py
+ExecStart=/root/rt-operator/rt-operator.py /root/rt-operator/rt-operator.yaml
 ExecStop=/bin/kill -INT ${MAINPID}
 
 [Install]
