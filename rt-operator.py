@@ -73,10 +73,8 @@ def main():
     load_kube_credentials(user_kubeconfig)
 
     runtime = get_container_runtime(node_name)
-    if runtime == 'docker':
-        runtime = docker.docker()
-    elif runtime == 'containerd':
-        runtime = containerd.containerd()
+    if runtime == None:
+        log.error("Couldn't determine container runtime")
 
     # Create the cgroup_handler based on detecting it or by what was
     # specified in the config file
@@ -108,17 +106,17 @@ def get_node_name():
     return node
 
 def get_container_runtime(node_name):
-    runtime = 'unknown'
+    runtime = None
     v1 = client.CoreV1Api()
     nodes = v1.list_node()
     for node in nodes.items:
         name = node.metadata.name.split('.')[0]
         if name == node_name:
-            runtime = node.status.node_info.container_runtime_version
-            if 'docker' in runtime:
-                runtime = 'docker'
-            elif 'containerd' in runtime:
-                runtime = 'containerd'
+            runtime_version = node.status.node_info.container_runtime_version
+            if 'docker' in runtime_version:
+                runtime = docker.docker()
+            elif 'containerd' in runtime_version:
+                runtime = containerd.containerd()
     return runtime
 
 
