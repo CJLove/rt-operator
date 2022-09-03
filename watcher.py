@@ -49,18 +49,19 @@ class watcher:
             return ('', False)
         else:
             # See if containerID is populated
-            if len(statuses) > 0:
-                status = statuses[0]
-                if status.container_id != None:
-                    container_id = status.container_id
-                    # Strip leading 'containerd://' prefix
-                    if container_id.startswith('containerd://'):
-                        container_id = container_id[len('containerd://'):]
-                    # Strip leading 'docker-' prefix
-                    if container_id.startswith('docker://'):
-                        container_id = container_id[len('docker://'):]
-                    return (container_id, True)
-                return ('', False)
+            if statuses != None:
+                if len(statuses) > 0:
+                    status = statuses[0]
+                    if status.container_id != None:
+                        container_id = status.container_id
+                        # Strip leading 'containerd://' prefix
+                        if container_id.startswith('containerd://'):
+                            container_id = container_id[len('containerd://'):]
+                        # Strip leading 'docker-' prefix
+                        if container_id.startswith('docker://'):
+                            container_id = container_id[len('docker://'):]
+                        return (container_id, True)
+                    return ('', False)
         return ('', False)
 
     def __get_pod_name(self, object):
