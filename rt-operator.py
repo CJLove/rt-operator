@@ -12,6 +12,7 @@ import cgroup_v1
 import cgroup_v2
 import docker
 import containerd
+import crio
 import watcher
 import yaml
 
@@ -115,6 +116,8 @@ def get_container_runtime(node_name):
         runtime = docker.docker()
     elif runtime_version.startswith('containerd'):
         runtime = containerd.containerd()
+    elif runtime_version.startswith('cri-o'):
+        runtime = crio.crio()
     return runtime
 
 

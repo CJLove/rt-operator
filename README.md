@@ -5,6 +5,7 @@ Kubernetes operator supporting containers with real-time threads
 Runtimes supported:
 - containerd
 - docker
+- cri-o
 
 ## Dependencies
 - Python3
