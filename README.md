@@ -54,7 +54,9 @@ cgroup_v1_capacity: 950000
 
 ## Running under systemd
 ### Installing and enabling
-Adjust paths in rt-operator.service as necessary
+- Adjust paths in `rt-operator.service` as necessary
+- Adjust `After` setting in `rt-operator.service` to after the `Kubelet.service` for Kubernetes or `k3s.service` for K3S
+
 ```bash
 $ sudo cp rt-operator.service /etc/systemd/system/
 $ sudo systemctl enable rt-operator
