@@ -54,11 +54,11 @@ class watcher:
                 if status.container_id != None:
                     container_id = status.container_id
                     # Strip leading 'containerd://' prefix
-                    if str.startswith('containerd://'):
-                        container_id = str[len('containerd://'):]
+                    if container_id.startswith('containerd://'):
+                        container_id = container_id[len('containerd://'):]
                     # Strip leading 'docker-' prefix
-                    if str.startswith('docker://'):
-                        container_id = str[len('docker://'):]
+                    if container_id.startswith('docker://'):
+                        container_id = container_id[len('docker://'):]
                     return (container_id, True)
                 return ('', False)
         return ('', False)
