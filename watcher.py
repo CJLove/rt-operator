@@ -20,7 +20,7 @@ class watcher:
 
     def __is_node_match(self,object):
         try:
-            name = object['spec']['nodeName'].split('.')[0]
+            name = object.spec.node_name.split('.')[0]
         except Exception as e:
             #self.log.debug(f"Exception: {e}")
             return ('',False)
@@ -34,7 +34,7 @@ class watcher:
 
     def __is_guaranteed_qos(self, object):
         try:
-            qos = object['status']['qosClass']
+            qos = object.status.qos_class
         except Exception as e:
             #self.log.debug(f"Exception: {e}")
             return False
@@ -43,7 +43,7 @@ class watcher:
 
     def __has_container_id(self, object):
         try:
-            statuses = object['status']['containerStatuses']
+            statuses = object.status.container_statuses
         except Exception as e:
             #self.log.debug(f"Exception: {e}")
             return ('', False)
@@ -51,20 +51,20 @@ class watcher:
             # See if containerID is populated
             if len(statuses) > 0:
                 status = statuses[0]
-                if 'containerID' not in status:
-                    return ('', False)
-                str = status['containerID']
+                str = status.container_id
                 container_id = str
                 # Strip leading 'containerd://' prefix
                 if str.startswith('containerd://'):
                     container_id = str[len('containerd://'):]
-                # TBD: other container runtimes
+                # Strip leading 'docker-' prefix
+                if str.startswith('docker://'):
+                    container_id = str[len('docker://'):]
                 return (container_id, True)
         return ('', False)
 
     def __get_pod_name(self, object):
         try:
-            name = object['metadata']['name']
+            name = object.metadata.name
         except:
             return ''
         else:
@@ -79,8 +79,7 @@ class watcher:
                 w = watch.Watch()
                 for event in w.stream(v1.list_pod_for_all_namespaces):
 
-                    # print(event['raw_object'])
-                    raw = event['raw_object']
+                    object = event['object']
                     type = event['type']
 
                     # Filter based on type
@@ -88,30 +87,30 @@ class watcher:
                         continue
 
                     # Filter based on QoS class
-                    if not self.__is_guaranteed_qos(raw):
+                    if not self.__is_guaranteed_qos(object):
                         continue
 
                     # Get the pod's node name and whether it matches this node's name
-                    (node, is_node_match) = self.__is_node_match(raw)
+                    (node, is_node_match) = self.__is_node_match(object)
                     if not is_node_match:
                         continue
 
                     # Filter pod without annotations
-                    if 'annotations' not in raw['metadata']:
+                    annotations = object.metadata.annotations
+                    if annotations == None:
                         continue
-                    annotations = raw['metadata']['annotations']
 
                     # Filter on whether pod as 'realtime' annotation
                     if not self.__is_rt_pod(annotations):
                         continue
 
                     # Filter on whether pod has container_id populated
-                    (container_id, has_container_id) = self.__has_container_id(raw)
+                    (container_id, has_container_id) = self.__has_container_id(object)
                     if not has_container_id:
                         continue
 
                     # Get the pod name
-                    name = self.__get_pod_name(raw)
+                    name = self.__get_pod_name(object)
 
                     # Filter pod without valid annotation(s) for the cgroup handler
                     if not self.cgroup_handler.has_valid_rt_annotation(name, container_id, annotations):

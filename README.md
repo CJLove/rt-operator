@@ -2,7 +2,11 @@
 
 Kubernetes operator supporting containers with real-time threads
 
-## dependencies
+Runtimes supported:
+- containerd
+- docker
+
+## Dependencies
 - Python3
 - Modules: kubernetes and its dependencies
     - cachetools (4.2.4)

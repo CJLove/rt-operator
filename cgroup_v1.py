@@ -12,10 +12,11 @@ import logging
 class cgroup_v1:
     base_dir = Path('/sys/fs/cgroup/cpu,cpuacct/kubepods')
 
-    def __init__(self, cap):
+    def __init__(self, runtime, cap):
         self.log = logging.getLogger('RtOperator')
+        self.runtime = runtime
         self.cap = cap
-        self.log.info(f"Using cpu.rt_runtime_us capacity {cap} for real-time PODs")
+        self.log.info(f"Using cpu.rt_runtime_us capacity {cap} for {runtime} real-time PODs")
         # Try writing the kubepods cpu.rt_runtime_us. This could fail if
         # the rt-operator service has started before kubelet is running
         self.__rewrite_pod_capacity()
@@ -61,7 +62,8 @@ class cgroup_v1:
 
             # Using Path.glob() find the pod subdirectory containing the specific container_id 
             # directory. Expect exactly 1 directory to match this
-            cont_dirs = [ d for d in self.base_dir.glob('pod*/'+container_id) if d.is_dir()]
+            cont_dirs = self.runtime.get_container_dir(container_id)
+            # [ d for d in self.base_dir.glob('pod*/'+container_id) if d.is_dir()]
             if len(cont_dirs) == 1:
                 # Get the container directory and the pod directory
                 cont_dir = cont_dirs[0]
@@ -75,12 +77,13 @@ class cgroup_v1:
             return False  
 
     def __rewrite_pod_capacity(self):
-        if self.__write_cpu_rt_runtime_us(self.base_dir, self.cap):
+        if self.__write_cpu_rt_runtime_us(self.runtime.get_base_dir(), self.cap):
             self.log.debug(f"Wrote {self.cap} to kubepods.cpu.rt_runtime_us")
 
     # Return the current aggregate rt_runtime_us allocated for all Kubernetes pods on this node
     def __aggregate_rt_runtime_us(self):
-        cpu_list = [d for d in self.base_dir.glob('pod*/*/cpu.rt_runtime_us') if d.is_file()]
+        cpu_list = self.runtime.get_cpu_list()
+        # [d for d in self.base_dir.glob('pod*/*/cpu.rt_runtime_us') if d.is_file()]
         rt_runtime_us = 0
         for file in cpu_list:
             with open(file,'r') as f:
@@ -93,7 +96,8 @@ class cgroup_v1:
         return rt_runtime_us
 
     def __current_rt_runtime_us(self, container_id):
-        cont_dirs = [ d for d in self.base_dir.glob('pod*/'+container_id) if d.is_dir()]
+        cont_dirs = self.runtime.get_container_dir(container_id)
+        #[ d for d in self.base_dir.glob('pod*/'+container_id) if d.is_dir()]
         if len(cont_dirs) == 1:
             cont_file = cont_dirs[0].joinpath('cpu.rt_runtime_us')
             with open(cont_file,'r') as f:

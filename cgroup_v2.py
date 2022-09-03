@@ -3,7 +3,8 @@ import logging
 # Placeholder for Kubernetes with cgroupv2
 
 class cgroup_v2:
-    def __init__(self):
+    def __init__(self, runtime):
+        self.runtime = runtime
         self.log = logging.getLogger('RtOperator')
 
     def type(self):

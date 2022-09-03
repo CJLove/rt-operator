@@ -3,7 +3,8 @@ import logging
 
 
 class cgroup_noop:
-    def __init__(self):
+    def __init__(self, runtime):
+        self.runtime = runtime
         self.log = logging.getLogger('RtOperator')
 
     def type(self):

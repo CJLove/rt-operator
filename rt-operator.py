@@ -10,11 +10,14 @@ import socket
 import cgroup_noop
 import cgroup_v1
 import cgroup_v2
+import docker
+import containerd
 import watcher
 import yaml
 
 from kubernetes import (
-    config
+    config,
+    client
 )
 
 logs.configure()
@@ -62,28 +65,38 @@ def main():
                 node_name = config['node_name']
 
             if 'cgroup_handler' in config:
-                name = config['cgroup_handler']
-                if name == "noop":
-                    cgroup_handler = cgroup_noop.cgroup_noop()
-                elif name == "cgroup_v1":
-                    cgroup_handler = cgroup_v1.cgroup_v1(cgroup_v1_capacity)
-                elif name == "cgroup_v2":
-                    cgroup_handler = cgroup_v2.cgroup_v2()
+                cgroup_handler = config['cgroup_handler']
+
     except:
         log.error(f"Error parsing {config_file}")
 
+    load_kube_credentials(user_kubeconfig)
+
+    runtime = get_container_runtime(node_name)
+    if runtime == 'docker':
+        runtime = docker.docker()
+    elif runtime == 'containerd':
+        runtime = containerd.containerd()
+
+    # Create the cgroup_handler based on detecting it or by what was
+    # specified in the config file
     if cgroup_handler == None:
         if os.path.isdir('/sys/fs/cgroup/cpu,cpuacct'):
             # System is running cgroups v1
-            cgroup_handler = cgroup_v1.cgroup_v1(950000)
+            cgroup_handler = cgroup_v1.cgroup_v1(runtime, cgroup_v1_capacity)
         elif os.path.isdir('/sys/fs/cgroup/system.slice'):
             # Future: support cgroups v2       
-            cgroup_handler = cgroup_v2.cgroup_v2()
+            cgroup_handler = cgroup_v2.cgroup_v2(runtime)
         else:
             cgroup_handler = cgroup_noop.cgroup_noop()
+    elif cgroup_handler == "noop":
+        cgroup_handler = cgroup_noop.cgroup_noop(runtime)
+    elif cgroup_handler == "cgroup_v1":
+        cgroup_handler = cgroup_v1.cgroup_v1(runtime, cgroup_v1_capacity)
+    elif cgroup_handler == "cgroup_v2":
+        cgroup_handler = cgroup_v2.cgroup_v2(runtime)    
 
-    load_kube_credentials(user_kubeconfig)
-
+    log.info("Using %s runtime" % runtime.type())
     log.info("Using %s cgroup handler" % cgroup_handler.type())
     log.info("Using node name %s" % node_name)
 
@@ -93,6 +106,21 @@ def main():
 def get_node_name():
     node = socket.gethostname().split('.')[0]
     return node
+
+def get_container_runtime(node_name):
+    runtime = 'unknown'
+    v1 = client.CoreV1Api()
+    nodes = v1.list_node()
+    for node in nodes.items:
+        name = node.metadata.name.split('.')[0]
+        if name == node_name:
+            runtime = node.status.node_info.container_runtime_version
+            if 'docker' in runtime:
+                runtime = 'docker'
+            elif 'containerd' in runtime:
+                runtime = 'containerd'
+    return runtime
+
 
 def load_kube_credentials(user_kubeconfig):
 
@@ -106,7 +134,7 @@ def load_kube_credentials(user_kubeconfig):
         config.load_kube_config(config_file=str(dev_kubeconfig))
     elif user_kubeconfig.exists():
         log.info("Loading user kube config")
-        config.load_kube_config()
+        config.load_kube_config(config_file=str(user_kubeconfig))
     else:
         log.info("Loading in-cluster kube config")
         try:
