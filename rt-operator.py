@@ -113,9 +113,9 @@ def get_container_runtime(node_name):
         name = node.metadata.name.split('.')[0]
         if name == node_name:
             runtime_version = node.status.node_info.container_runtime_version
-            if 'docker' in runtime_version:
+            if runtime_version.startswith('docker'):
                 runtime = docker.docker()
-            elif 'containerd' in runtime_version:
+            elif runtime_version.startswith('containerd'):
                 runtime = containerd.containerd()
     return runtime
 
