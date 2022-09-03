@@ -57,9 +57,12 @@ class watcher:
                         # Strip leading 'containerd://' prefix
                         if container_id.startswith('containerd://'):
                             container_id = container_id[len('containerd://'):]
-                        # Strip leading 'docker-' prefix
+                        # Strip leading 'docker://' prefix
                         if container_id.startswith('docker://'):
                             container_id = container_id[len('docker://'):]
+                        # Strip leading 'cri-o://' prefix
+                        if container_id.startswith('cri-o://'):
+                            container_id = container_id[len('cri-o://'):]
                         return (container_id, True)
                     return ('', False)
         return ('', False)
