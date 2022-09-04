@@ -11,9 +11,11 @@ class cgroup_v2:
         return "cgroup_v2"
 
     def has_valid_rt_annotation(self, name, container_id, annotations):
-        self.log.debug(f"Pod {name} checking realtime annotations for cgroupv2")
+        # Currently no cgroup manipulation required for cgroupv2
+        self.log.debug(f"Pod {name} with realtime annotations for cgroupv2")
         return False
 
     def set_rt_pod(self, name, container_id, annotations):
-        self.log.debug(f"Pod {name} setting realtime capabilities for cgorupv2")
+        # No action to take here
+        self.log.debug(f"Pod {name} with realtime annotations for cgorupv2")
         return False

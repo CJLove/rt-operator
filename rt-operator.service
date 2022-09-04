@@ -1,6 +1,9 @@
 [Unit]
 Description=rt-operator
-After=network.target
+# Depend on kubelet service so rt-operator can create client connection
+After=kubelet.service
+# If running K3S change this to:
+# After=k3s.service
 
 [Service]
 ExecStart=/root/rt-operator/rt-operator.py /root/rt-operator/rt-operator.yaml
