@@ -8,7 +8,7 @@ log_level: "DEBUG"
 #kube_path: /path/to/.kube/config
 
 # Override system hostname used for comparisons with pod's node allocation
-node_name: myhostname
+#node_name: myhostname
 
 # Override cgroup handler: noop | cgroup_v1 | cgroup_v2
 # cgroup_handler: noop
