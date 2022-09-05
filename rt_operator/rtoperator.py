@@ -4,21 +4,24 @@ import logging
 import os
 from pathlib import Path
 import sys
-import ast
-import logs
 import socket
-import cgroup_noop
-import cgroup_v1
-import cgroup_v2
-import docker
-import containerd
-import crio
-import watcher
+
 import yaml
 
 from kubernetes import (
     config,
     client
+)
+
+from rt_operator import (
+    logs,
+    cgroup_noop,
+    cgroup_v1,
+    cgroup_v2,
+    docker,
+    containerd,
+    crio,
+    watcher
 )
 
 logs.configure()
