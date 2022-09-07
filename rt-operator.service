@@ -6,7 +6,7 @@ After=kubelet.service
 # After=k3s.service
 
 [Service]
-ExecStart=/usr/local/bin/rt-operator/rt-operator.py /usr/local/etc/rt-operator.yaml
+ExecStart=/usr/local/bin/rt-operator /usr/local/etc/rt-operator.yaml
 ExecStop=/bin/kill -INT ${MAINPID}
 Restart=always
 StartLimitInterval=0
