@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: threadtest
+      labels:
+        app: threadtest
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: threadtest
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 50%
+          maxSurge: 1
+      template:
+        metadata:
+          labels:
+            app: threadtest
+          annotations:
+            realtime: "true"
+            rt_runtime_us: "50000"
+        spec:
+          containers:
+          - name: threadtest
+            image: fir.love.io:3005/threadtest:latest
+            imagePullPolicy: Always
+            resources:
+              limits:
+                memory: "200Mi"
+                cpu: "700m"
+              requests:
+                memory: "200Mi"
+                cpu: "700m"
+            securityContext:
+              privileged: true
+              capabilities:
+                add:
+                  - SYS_NICE
+          nodeSelector:
+            cputype: amd64
+

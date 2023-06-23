@@ -1,8 +1,20 @@
 # rt-operator
 
-Kubernetes operator supporting containers with real-time threads
+Experimental Kubernetes operator supporting containers with real-time threads on a cgroups v1 host like RHEL 7/CentOS 7. This operator runs a service on the host with a path to credentials for the cluster.
+As pod(s) are deployed with the following annotations present, the pod's containers' cgroup will be modified to have necessary capabilities to run real-time threads.
 
-Runtimes supported:
+```yaml
+annotations:
+  realtime: "true"
+  rt_runtime_us: "25000"
+```
+Where
+- realtime: set to either "true" or "false"
+- rt_runtime_us: set to this container's `rt_runtime_us` value in microseconds
+
+See `example/threadtest.yaml` for full pod deployment yaml showing the annotations. See [CJLove/thread-playground](https://github.com/CJLove/thread-playground) for the source for building a container with real-time threads.
+
+Container runtimes supported:
 - containerd
 - docker
 - cri-o
